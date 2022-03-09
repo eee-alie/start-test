@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\LoginRes;
 use App\Http\Resources\UserRes;
 use App\Models\User;
-use App\Rules\CheckUserPassword;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +14,7 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function createOrLoginUser(Request $request)
+    public function createOrLoginUser(Request $request): LoginRes
     {
         $request->validate([
             'mobile' => ['required', 'regex:/^(\+98|0)?9\d{9}$/'],
@@ -35,7 +35,7 @@ class UserController extends Controller
         return new LoginRes($user);
     }
 
-    public function editUser(Request $request)
+    public function editUser(Request $request): JsonResponse|UserRes
     {
         $validate = validator(['id' => $request['id']], [
             'id' => ['required', Rule::exists('users'), Rule::in([Auth::user()['id']])]]);
@@ -48,7 +48,7 @@ class UserController extends Controller
         return new UserRes($user);
     }
 
-    public function getUser(Request $request)
+    public function getUser(Request $request): JsonResponse|UserRes
     {
         $validate = validator(['id' => $request['id']], ['id' => ['required', Rule::exists('users')]]);
         if ($validate->fails()) return Response::json(['message' => "The given data was invalid.", 'errors' => $validate->errors()], 422);
